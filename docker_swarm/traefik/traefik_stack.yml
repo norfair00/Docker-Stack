@@ -3,16 +3,6 @@ version: '3'
 services:
   reverse-proxy:
     image: traefik:v2.2
-    command:
-      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
-      - "--providers.docker.swarmMode=true"
-      - "--api=true"
-      - "--api.dashboard=true"
-      - "--api.insecure=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=traefik-public"
-      - "--entrypoints.http.address=:80"
-      - "--entrypoints.https.address=:443"
     ports:
       - 80:80
       - 443:443
@@ -23,10 +13,17 @@ services:
     networks:
       - traefik-public
     deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.lookmyhomelab.bid`)"
+        - "traefik.http.routers.traefik.entrypoints=https"
+        - "traefik.http.routers.traefik.tls=true"
+        - "traefik.http.routers.traefik.service=api@internal"
+        - "traefik.http.services.dummy-svc.loadbalancer.server.port=8080"
       placement:
         constraints:
           - node.role == manager
 
 networks:
   traefik-public:
-    driver: overlay
+    external: true

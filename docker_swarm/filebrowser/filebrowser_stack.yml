@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: filebrowser/filebrowser
+    container_name: filebrowser
+    volumes:
+      - /mnt/disk1:/srv
+      - /mnt/disk2/filebrowser/config.json:/config.json
+      - /mnt/disk2/filebrowser/database.db:/database.db
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.filebrowser_https.rule=Host(`files.lookmyhomelab.bid`)"
+        - "traefik.http.routers.filebrowser_https.entrypoints=https"
+        - "traefik.http.routers.filebrowser_https.tls=true"
+        - "traefik.http.services.filebrowser_https.loadbalancer.server.port=80"
+        - "traefik.docker.network=traefik-public"
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  traefik-public:
+    external: true

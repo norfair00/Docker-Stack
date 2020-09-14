@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  flood-torrent:
+    container_name: flood-torrent
+    image: wonderfall/rtorrent-flood:new
+    environment:
+      - PGID=1000
+      - PUID=1000
+      - TZ=Europe/Paris
+    ports:
+      - 49184:49184
+    volumes:
+      - /mnt/disk2/floodtorrent/db:/flood-db
+      - /mnt/disk1/torrent:/data
+    networks:
+      - traefik-public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.floodtorrent_https.rule=Host(`torrent.lookmyhomelab.bid`)"
+        - "traefik.http.routers.floodtorrent_https.entrypoints=https"
+        - "traefik.http.routers.floodtorrent_https.tls=true"
+        - "traefik.http.services.floodtorrent_https.loadbalancer.server.port=3000"
+        - "traefik.docker.network=traefik-public"
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  traefik-public:
+    external: true
