@@ -1,0 +1,37 @@
+[global]
+  sendAnonymousUsage = false
+
+[log]
+  level = "INFO"
+  format = "common"
+
+[providers]
+  [providers.docker]
+    swarmMode = true
+    swarmModeRefreshSeconds = 30
+    endpoint = "unix:///var/run/docker.sock"
+    network = "traefik-public"
+    watch = false
+    exposedByDefault = false
+[api]
+  dashboard = true
+  debug = true
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  [entryPoints.https]
+    address = ":443"
+  [entryPoints.metrics]
+    address = ":8082"
+
+# Cloudflare Configuration
+[tls.options]
+  [tls.options.default]
+    [tls.options.default.clientAuth]
+      caFiles = ["/etc/traefik/certs/origin-pull-ca.pem"]
+      clientAuthType = "RequireAndVerifyClientCert"
+
+#[[tls.certificates]]
+#  certFile = "/etc/traefik/certs/example.cert"
+#  keyfile = "/etc/traefik/certs/example.key"
